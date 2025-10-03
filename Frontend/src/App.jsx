@@ -1,17 +1,25 @@
-export default function App() {
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Welcome from "./components/welcome.jsx";
+
+// Pages
+const Home = () => <h1>Home Page</h1>;
+const About = () => <h1>About Page</h1>;
+const Contact = () => <h1>Contact Page</h1>;
+const NotFound = () => <h1>404 - Page Not Found</h1>;
+
+function App() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-xl rounded-2xl p-8 text-center">
-        <h1 className="text-3xl font-bold text-blue-600 mb-4">
-          Tailwind + React Check
-        </h1>
-        <p className="text-gray-700 mb-6">
-          ✅ If you see styles (colors, padding, rounded corners), Tailwind is working!
-        </p>
-        <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-          Test Button
-        </button>
-      </div>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Welcome />} /> {/* ✅ Fixed here */}
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
   );
 }
+
+export default App;
