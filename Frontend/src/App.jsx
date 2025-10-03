@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Welcome from "./components/welcome.jsx";
+import ClickSafeRegistration from "./components/Register.jsx";
+import ClickSafeSignIn from "./components/Sign.jsx"
 
 // Pages
 const Home = () => <h1>Home Page</h1>;
@@ -14,8 +16,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Welcome />} /> {/* ✅ Fixed here */}
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/register" element={<ClickSafeRegistration />} />
+        <Route path="/Login" element={<ClickSafeSignIn />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

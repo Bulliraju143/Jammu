@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Shield, Mail, Users, BarChart3, Lock, CheckCircle, ArrowRight, Menu, X } from 'lucide-react';
 
 export default function Welcome() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+   const navigate = useNavigate();
+
   const handleRegister = () => {
-    alert('Registration page will open');
+    navigate("/register");
   };
 
   return (
@@ -70,6 +73,7 @@ export default function Welcome() {
           </p>
 
           <div className="max-w-md mx-auto">
+            
             <button
               onClick={handleRegister}
               className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition flex items-center justify-center gap-2"
