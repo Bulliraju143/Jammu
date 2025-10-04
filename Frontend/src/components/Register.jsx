@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import {Link} from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
 import { Shield, Mail, Lock, Building2, ArrowRight, CheckCircle2 } from 'lucide-react';
 
+const API_URL = 'http://localhost:5000/api';
+
 export default function ClickSafeRegistration() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     email: '',
@@ -19,7 +22,7 @@ export default function ClickSafeRegistration() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleSendOTP = () => {
+  const handleSendOTP = async () => {
     setErrors({});
     
     if (!formData.email) {
@@ -33,13 +36,36 @@ export default function ClickSafeRegistration() {
     }
 
     setLoading(true);
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch(`${API_URL}/auth/send-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStep(2);
+        // Only log OTP in console for development
+        if (data.otp) {
+          console.log('Development Mode - OTP sent to console:', data.otp);
+        }
+      } else {
+        setErrors({ email: data.error || 'Failed to send OTP' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setErrors({ email: 'Network error. Please try again.' });
+    } finally {
       setLoading(false);
-      setStep(2);
-    }, 1500);
+    }
   };
 
-  const handleVerifyOTP = () => {
+  const handleVerifyOTP = async () => {
     setErrors({});
     
     if (!formData.otp || formData.otp.length !== 6) {
@@ -48,10 +74,32 @@ export default function ClickSafeRegistration() {
     }
 
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const response = await fetch(`${API_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: formData.email,
+          otp: formData.otp 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStep(3);
+      } else {
+        setErrors({ otp: data.error || 'Invalid OTP' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setErrors({ otp: 'Network error. Please try again.' });
+    } finally {
       setLoading(false);
-      setStep(3);
-    }, 1500);
+    }
   };
 
   const handleSetPassword = () => {
@@ -67,14 +115,10 @@ export default function ClickSafeRegistration() {
       return;
     }
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep(4);
-    }, 1500);
+    setStep(4);
   };
 
-  const handleCompanyDetails = () => {
+  const handleCompanyDetails = async () => {
     setErrors({});
     
     if (!formData.companyName) {
@@ -88,10 +132,37 @@ export default function ClickSafeRegistration() {
     }
 
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          companyName: formData.companyName,
+          companyDescription: formData.companyDescription
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save token to localStorage
+        localStorage.setItem('clicksafe_token', data.token);
+        localStorage.setItem('clicksafe_user', JSON.stringify(data.user));
+        setStep(5);
+      } else {
+        setErrors({ companyName: data.error || 'Registration failed' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setErrors({ companyName: 'Network error. Please try again.' });
+    } finally {
       setLoading(false);
-      setStep(5);
-    }, 1500);
+    }
   };
 
   const handleChange = (e) => {
@@ -108,6 +179,10 @@ export default function ClickSafeRegistration() {
     if (e.key === 'Enter') {
       action();
     }
+  };
+
+  const handleGoToDashboard = () => {
+    navigate('/dashboard');
   };
 
   return (
@@ -306,8 +381,8 @@ export default function ClickSafeRegistration() {
                 className="w-full py-3 rounded-lg font-semibold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
                 style={{ background: 'oklch(0.42 0.11 268.04)' }}
               >
-                {loading ? 'Setting...' : 'Continue'}
-                {!loading && <ArrowRight className="w-5 h-5" />}
+                Continue
+                <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           )}
@@ -403,7 +478,7 @@ export default function ClickSafeRegistration() {
               </div>
 
               <button
-                onClick={() => alert('Redirecting to dashboard...')}
+                onClick={handleGoToDashboard}
                 className="w-full py-3 rounded-lg font-semibold text-white transition-all hover:opacity-90"
                 style={{ background: 'oklch(0.42 0.11 268.04)' }}
               >
@@ -414,13 +489,13 @@ export default function ClickSafeRegistration() {
         </div>
 
         {step < 5 && (
-            <Link to="/Login">
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Already have an account?{' '}
-            <button className="font-semibold hover:underline transition-colors" style={{ color: 'oklch(0.62 0.03 269.34)' }}>
-              Sign In
-            </button>
-          </p>
+          <Link to="/login">
+            <p className="text-center text-sm text-gray-500 mt-6">
+              Already have an account?{' '}
+              <span className="font-semibold hover:underline transition-colors" style={{ color: 'oklch(0.62 0.03 269.34)' }}>
+                Sign In
+              </span>
+            </p>
           </Link>
         )}
       </div>

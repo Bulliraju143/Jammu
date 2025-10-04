@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import {Link} from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
 import { Shield, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
+const API_URL = 'http://localhost:5000/api';
+
 export default function ClickSafeSignIn() {
-  const [isSignIn, setIsSignIn] = useState(true);
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -16,7 +18,7 @@ export default function ClickSafeSignIn() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     setErrors({});
     
     if (!formData.email) {
@@ -35,10 +37,37 @@ export default function ClickSafeSignIn() {
     }
 
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const response = await fetch(`${API_URL}/auth/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save token and user data to localStorage
+        localStorage.setItem('clicksafe_token', data.token);
+        localStorage.setItem('clicksafe_user', JSON.stringify(data.user));
+        
+        // Redirect to dashboard
+        navigate('/dashboard');
+      } else {
+        setErrors({ email: data.error || 'Sign in failed' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setErrors({ email: 'Network error. Please try again.' });
+    } finally {
       setLoading(false);
-      alert('Sign in successful! Redirecting to dashboard...');
-    }, 1500);
+    }
   };
 
   const handleChange = (e) => {
@@ -60,20 +89,17 @@ export default function ClickSafeSignIn() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'oklch(0.23 0.06 264.88)' }}>
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
-         <Shield className="w-8 h-8 text-blue-400" />
-              <span className="text-2xl font-bold text-white">ClickSafe</span>
+          <Shield className="w-8 h-8 text-blue-400" />
+          <span className="text-2xl font-bold text-white">ClickSafe</span>
         </div>
       
-        {/* Main Card */}
         <div className="rounded-2xl p-8 shadow-2xl" style={{ background: 'oklch(0.23 0.06 264.88)', border: '1px solid oklch(0.42 0.11 268.04)' }}>
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
             <p className="text-gray-400">Sign in to your ClickSafe account</p>
           </div>
 
-          {/* Email Input */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Email Address
@@ -100,14 +126,13 @@ export default function ClickSafeSignIn() {
             )}
           </div>
 
-          {/* Password Input */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-gray-300">
                 Password
               </label>
               <button
-                onClick={() => alert('Password reset link sent!')}
+                onClick={() => alert('Password reset functionality coming soon!')}
                 className="text-sm font-medium hover:underline transition-colors"
                 style={{ color: '#0085ce' }}
               >
@@ -146,7 +171,6 @@ export default function ClickSafeSignIn() {
             )}
           </div>
 
-          {/* Remember Me Checkbox */}
           <div className="flex items-center mb-6">
             <input
               type="checkbox"
@@ -161,7 +185,6 @@ export default function ClickSafeSignIn() {
             </label>
           </div>
 
-          {/* Sign In Button */}
           <button
             onClick={handleSignIn}
             disabled={loading}
@@ -171,7 +194,6 @@ export default function ClickSafeSignIn() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
-          {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t" style={{ borderColor: 'oklch(0.42 0.11 268.04)' }}></div>
@@ -183,10 +205,9 @@ export default function ClickSafeSignIn() {
             </div>
           </div>
 
-          {/* Social Sign In Buttons */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             <button
-              onClick={() => alert('Google sign in')}
+              onClick={() => alert('Google sign in coming soon!')}
               className="flex items-center justify-center gap-2 py-3 rounded-lg font-medium text-white transition-all hover:opacity-80"
               style={{ background: 'oklch(0.23 0.06 264.88)', border: '1px solid oklch(0.42 0.11 268.04)' }}
             >
@@ -199,7 +220,7 @@ export default function ClickSafeSignIn() {
               Google
             </button>
             <button
-              onClick={() => alert('Microsoft sign in')}
+              onClick={() => alert('Microsoft sign in coming soon!')}
               className="flex items-center justify-center gap-2 py-3 rounded-lg font-medium text-white transition-all hover:opacity-80"
               style={{ background: 'oklch(0.23 0.06 264.88)', border: '1px solid oklch(0.42 0.11 268.04)' }}
             >
@@ -214,21 +235,15 @@ export default function ClickSafeSignIn() {
           </div>
         </div>
 
-        {/* Footer */}
         <Link to="/register">
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Don't have an account?{' '}
-          <button
-            
-            className="font-semibold hover:underline transition-colors"
-            style={{ color: 'oklch(0.62 0.03 269.34)' }}
-          >
-            Create Account
-          </button>
-        </p>
+          <p className="text-center text-sm text-gray-500 mt-6">
+            Don't have an account?{' '}
+            <span className="font-semibold hover:underline transition-colors" style={{ color: 'oklch(0.62 0.03 269.34)' }}>
+              Create Account
+            </span>
+          </p>
         </Link>
 
-        {/* Additional Links */}
         <div className="flex items-center justify-center gap-4 mt-6 text-sm text-gray-500">
           <button className="hover:text-gray-300 transition-colors">Terms</button>
           <span>•</span>

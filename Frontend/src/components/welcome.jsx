@@ -1,14 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Shield, Mail, Users, BarChart3, Lock, CheckCircle, ArrowRight, Menu, X } from 'lucide-react';
+import { Shield, Mail, Users, BarChart3, Lock, ArrowRight, Menu, X } from 'lucide-react';
 
 export default function Welcome() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleRegister = () => {
     navigate("/register");
+  };
+
+  const handleSignIn = () => {
+    navigate("/login");
+  };
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setMobileMenuOpen(false);
+    }
   };
 
   return (
@@ -17,16 +28,19 @@ export default function Welcome() {
       <nav className="bg-slate-900/80 backdrop-blur-md border-b border-blue-800/30 fixed w-full z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <Shield className="w-8 h-8 text-blue-400" />
               <span className="text-2xl font-bold text-white">ClickSafe</span>
             </div>
             
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-gray-300 hover:text-white transition">Features</a>
-              <a href="#how-it-works" className="text-gray-300 hover:text-white transition">How It Works</a>
-              <a href="#pricing" className="text-gray-300 hover:text-white transition">Pricing</a>
-              <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              <button onClick={() => scrollToSection('features')} className="text-gray-300 hover:text-white transition">
+                Features
+              </button>
+              <button onClick={() => scrollToSection('how-it-works')} className="text-gray-300 hover:text-white transition">
+                How It Works
+              </button>
+              <button onClick={handleSignIn} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                 Sign In
               </button>
             </div>
@@ -44,10 +58,13 @@ export default function Welcome() {
         {mobileMenuOpen && (
           <div className="md:hidden bg-slate-800 border-t border-blue-800/30">
             <div className="px-4 py-4 space-y-3">
-              <a href="#features" className="block text-gray-300 hover:text-white">Features</a>
-              <a href="#how-it-works" className="block text-gray-300 hover:text-white">How It Works</a>
-              <a href="#pricing" className="block text-gray-300 hover:text-white">Pricing</a>
-              <button className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <button onClick={() => scrollToSection('features')} className="block w-full text-left text-gray-300 hover:text-white">
+                Features
+              </button>
+              <button onClick={() => scrollToSection('how-it-works')} className="block w-full text-left text-gray-300 hover:text-white">
+                How It Works
+              </button>
+              <button onClick={handleSignIn} className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 Sign In
               </button>
             </div>
@@ -72,21 +89,26 @@ export default function Welcome() {
             Protect your organization with realistic phishing simulations and comprehensive security awareness training. Turn your employees into your strongest defense.
           </p>
 
-          <div className="max-w-md mx-auto">
-            
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
             <button
               onClick={handleRegister}
-              className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition flex items-center justify-center gap-2"
             >
-              Register Now
+              Get Started Free
               <ArrowRight className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleSignIn}
+              className="w-full sm:w-auto px-8 py-4 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700 transition border border-blue-600/50"
+            >
+              Sign In
             </button>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 bg-slate-800/50">
+      <section id="features" className="py-20 px-4 bg-slate-800/50 scroll-mt-16">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
@@ -124,7 +146,7 @@ export default function Welcome() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-20 px-4">
+      <section id="how-it-works" className="py-20 px-4 scroll-mt-16">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
@@ -176,12 +198,12 @@ export default function Welcome() {
           <p className="text-xl text-blue-100 mb-8">
             Join hundreds of companies protecting their teams with ClickSafe
           </p>
-          <div className="max-w-md mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
             <button
               onClick={handleRegister}
-              className="w-full px-8 py-4 bg-slate-900 text-white rounded-lg font-semibold hover:bg-slate-800 transition flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-lg font-semibold hover:bg-slate-800 transition flex items-center justify-center gap-2"
             >
-              Register Now
+              Start Free Trial
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
